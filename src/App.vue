@@ -1,12 +1,18 @@
 <template>
-  <div>
-    <label>
-      <p>Digite os dados:</p>
-      <div>
-        <input placeholder="2d4+7+5d10-8" v-model="diceInput">
-        <button @click="rollAllDices">Jogar</button>
-      </div>
-    </label>
+  <div class="body">
+    <div class="dados">
+      <label>
+        <p>Digite os dados:</p>
+        <div>
+          <input placeholder="2d4+7+5d10-8" v-model="diceInput">
+          <button @click="rollAllDices">Jogar</button>
+        </div>
+      </label>
+      {{diceAndMod}}
+    </div>
+    <div class="resultado">
+      <div>{{totalRoll}}</div>
+    </div>
   </div>
 </template>
 
@@ -16,17 +22,31 @@ export default {
   data(){
     return{
       diceInput: '',
-      totalRoll: 0
+      totalRoll: 0,
+      rolledDice: [],
+      wasError: false,
+      errorMsn: ''
     }
   },
   methods:{
     rollAllDices(){
-      for (let i = 0; i < this.diceAndMod.length; i++) {
-        const element = this.diceAndMod[i];
-        // this.calcDiceRoll(element.diceAmount, element.diceType)
-        element.rolls = this.calcDiceRoll(element.diceAmount, element.diceType)
-        element.total = this.calcDiceTotal(element.rolls, element.diceMod)
-        this.calcTotal(element.total)
+      if(this.diceInput != ''){
+        if(this.totalRoll != 0){
+          this.totalRoll = 0 
+        }
+        for (let i = 0; i < this.diceAndMod.length; i++) {
+          const element = this.diceAndMod[i];
+          // this.calcDiceRoll(element.diceAmount, element.diceType)
+          element.rolls = this.calcDiceRoll(element.diceAmount, element.diceType)
+          element.total = this.calcDiceTotal(element.rolls, element.diceMod)
+          this.rolledDice.push(element)
+          // console.log(element)
+          this.calcTotal(element.total)
+        }
+      }else{
+        this.errorCase(1)
+        // this.wasError = true
+        // this.errorMsn = 'Digite Alguma Coisa!'
       }
     },
     calcDiceRoll(amount, type){
@@ -47,11 +67,23 @@ export default {
     },
     calcTotal(diceTotal){
       return this.totalRoll += diceTotal
+    },
+    errorCase(type){
+      this.wasError = true
+      switch (type) {
+        case 1:
+          this.errorMsn = 'Digite Alguma coisa!'
+          break;
+        case 2:
+          this.errorMsn = 'Você não pode lançar ZERO dados!'
+          break;
+      }
+      console.log(this.errorMsn)
     }
   },
   computed:{
     diceAndMod: function(){
-      const regex = /((\d+)[d,D](4|6|8|10|12|20|100))((\+|-)\d)?/g
+      const regex = /((\d+)[d,D](4|6|8|10|12|20|100))((\+|-)([1-9][0-9]*))?/g
       const matchedGroups = this.diceInput.matchAll(regex);
       const diceAndMod = []
       for(let groups of matchedGroups){
@@ -75,7 +107,9 @@ export default {
             // total: null
           })
         }else{
-          console.log('Não pode jogar Zero dados')
+          this.errorCase(2)
+          // this.wasError = true
+          // this.errorMsn = 'Você não pode lançar ZERO dados!'
         }
       }
       return diceAndMod
