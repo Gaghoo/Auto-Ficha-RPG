@@ -1,17 +1,26 @@
 <template>
-  <div class="body">
-    <div class="dados">
-      <label>
-        <p>Digite os dados:</p>
-        <div>
-          <input placeholder="2d4+7+5d10-8" v-model="diceInput">
-          <button @click="rollAllDices">Jogar</button>
+  <div class="h-screen w-screen flex flex-col justify-center items-center bg-gray-300">
+    <div class="border-4 rounded-2xl border-yellow-700 p-10 max-w-screen-md bg-yellow-300">
+      <div class="dados">
+        <label>
+          <p>Digite os dados:</p>
+          <div>
+            <input placeholder="2d4+7+5d10-8" v-model="diceInput">
+            <button @click="rollAllDices">Jogar</button>
+          </div>
+        </label>
+      </div>
+      <div class="resultado">
+        <div v-if="wasError">{{errorMsn}}</div>
+        <div v-for="dice in rolledDice" :key="dice.label">
+          <div>{{dice.label}}: 
+            <span v-for="(roll,i) in dice.rolls" :key="i"> {{roll}} </span> 
+            <span>{{dice.diceModSing}}{{Math.abs(dice.diceMod)}} </span>
+            <span> = {{dice.total}}</span>
+          </div>
         </div>
-      </label>
-      {{diceAndMod}}
-    </div>
-    <div class="resultado">
-      <div>{{totalRoll}}</div>
+        <dir>{{totalRoll}}</dir>
+      </div>
     </div>
   </div>
 </template>
@@ -31,6 +40,7 @@ export default {
   methods:{
     rollAllDices(){
       if(this.diceInput != ''){
+        this.rolledDice = []
         if(this.totalRoll != 0){
           this.totalRoll = 0 
         }
@@ -43,6 +53,7 @@ export default {
           // console.log(element)
           this.calcTotal(element.total)
         }
+        this.errorCase(3)
       }else{
         this.errorCase(1)
         // this.wasError = true
@@ -77,6 +88,13 @@ export default {
         case 2:
           this.errorMsn = 'Você não pode lançar ZERO dados!'
           break;
+        case 3:
+          this.wasError = false
+          this.errorMsn = ''
+          break;
+        case 4:
+          this.errorMsn = 'Digite um Formato valido.'
+          break;
       }
       console.log(this.errorMsn)
     }
@@ -86,6 +104,9 @@ export default {
       const regex = /((\d+)[d,D](4|6|8|10|12|20|100))((\+|-)([1-9][0-9]*))?/g
       const matchedGroups = this.diceInput.matchAll(regex);
       const diceAndMod = []
+      if(matchedGroups == null){
+        this.errorCase(4)
+      }
       for(let groups of matchedGroups){
         if(parseInt(groups[2])>0){
           // if (groups[4] != null) {
@@ -112,6 +133,7 @@ export default {
           // this.errorMsn = 'Você não pode lançar ZERO dados!'
         }
       }
+      this.errorCase(3)
       return diceAndMod
     }
   },
