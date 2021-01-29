@@ -56,3 +56,104 @@ function addDice(dice, index) {
 function rollDice(type) {
   return Math.floor(Math.random() * (type - 1)) + 1;
 }
+
+//TENTATIVA DE RESOLVER O PROBLEMA DE CAPTURA DE VALORES NA REGEX por meio da captura em partes e substituição dos valores ja usados.
+
+const input2 = '2d10+3-2D20+1d4+1+0d8-3d12+4+1d12+4+2d20';
+const regexDices = /(\d+)[d,D](4|6|8|10|12|20|100)((\+|-)(\d+)(\+|-))|(\d+)[d,D](4|6|8|10|12|20|100)(\+|-)?/g;
+
+const dices2 = []
+
+const matchedDices = input2.matchAll(regexDices);
+// [2d10, 2D20, 1d4, 0d8, 3d12, 1d12]
+
+for(let dice of matchedDices){
+  dices2.push({
+    label: dice[0],
+    diceAmount: parseInt(dice[1] || dice[7]),
+    diceType: parseInt(dice[2] || dice[8]),
+    diceModSign: dice[4] || null,
+    diceMod: parseInt(dice[5]) || null,
+    diceOperation: dice[6] || dice[9] || null
+  })
+}
+
+function addDice2(dice) {
+  let total = 0
+  dice.rolls = []
+
+  for (let i = 0; i < dice.diceAmount; i++) {
+    const roll = rollDice(dice.diceType)
+    dice.rolls.push(roll)
+    total += roll
+  }
+
+  if(dice.diceMod != null){
+    total += dice.diceMod
+  }
+  
+  dice.total = total
+}
+
+dices2.forEach(addDice2)
+
+console.log(dices2)
+
+let totalPlayed = dices2[0].total
+
+for (let i = 0; i < dices2.length; i++) {
+  const element = dices2[i].diceOperation;
+  const el2 = dices2[i].total
+  console.log(el2, ' ', element)
+}
+
+for (let i = 0; i < dices2.length; i++) {
+  if (dices2[i].diceOperation === "+") {
+    totalPlayed += dices2[i+1].total
+  }
+  if (dices2[i].diceOperation === "-") {
+    totalPlayed -= dices2[i+1].total
+  }
+  console.log(totalPlayed)
+}
+
+
+console.log(totalPlayed)
+
+// const modsOperation = input2.replace(regexDices, filter)
+// // xxx+3-xxx-3+xxx+1+xxx-xxx+4+xxx+4
+
+// var res = modsOperation.split(filter)
+// // ['', +3-, -3+, +1+, -, +4+, +4]
+// res.shift();
+// if (res[res.length - 1] == '') {
+//   res.pop();
+// }
+// // [+3-, -3+, +1+, -, +4+, +4]
+
+// for (let i = 0; i < matchedDices.length; i++) {
+//   let dadoDaVez = matchedDices[0];
+//   if (i == 0) {
+//     const mod = res[0];
+    
+//   } else {
+    
+//   }
+// }
+
+// for(let dice of matchedDices) {
+//   dices2.push({
+//     label: dice[0],
+//     diceAmount: dice[1],
+//     diceType: dice[2]
+//   })
+// }
+
+// for (let i = 0; i < res.length; i++) {
+//   const element = res[i];
+//   const element2 = element.split("")
+//   // console.log(element2, element2.length)
+//   // if (element2.length > 1) {
+//   //   console.log(element2)
+//   // }
+// }
