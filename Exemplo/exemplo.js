@@ -59,8 +59,10 @@ function rollDice(type) {
 
 //TENTATIVA DE RESOLVER O PROBLEMA DE CAPTURA DE VALORES NA REGEX por meio da captura em partes e substituição dos valores ja usados.
 
-const input2 = '2d10+3-2D20+1d4+1+0d8-3d12+4+1d12+4+2d20';
-const regexDices = /(\d+)[d,D](4|6|8|10|12|20|100)((\+|-)(\d+)(\+|-))|(\d+)[d,D](4|6|8|10|12|20|100)(\+|-)?/g;
+const input2 = '2d10+3-2D20+1d4+1+0d8+3d12+4-1d12-4+5d20';
+const regexDices = /(\d+)[d,D](4|6|8|10|12|20|100)(((\+|-)\d+)(\+|-))|(\d+)[d,D](4|6|8|10|12|20|100)(\+|-)?/g;
+
+///(\d+)[d,D](4|6|8|10|12|20|100)(((\+|-)\d+)(\+|-))|(\d+)[d,D](4|6|8|10|12|20|100)(\+|-)?/g <--- REGEX CORRETA, A ANTIGA DA PROBLEMA NO MOD NEGATIVO
 
 const dices2 = []
 
@@ -68,12 +70,13 @@ const matchedDices = input2.matchAll(regexDices);
 // [2d10, 2D20, 1d4, 0d8, 3d12, 1d12]
 
 for(let dice of matchedDices){
+  //console.log(dice)
   dices2.push({
     label: dice[0],
     diceAmount: parseInt(dice[1] || dice[7]),
     diceType: parseInt(dice[2] || dice[8]),
-    diceModSign: dice[4] || null,
-    diceMod: parseInt(dice[5]) || null,
+    diceModSign: dice[5] || null,
+    diceMod: parseInt(dice[4]) || null,
     diceOperation: dice[6] || dice[9] || null
   })
 }
